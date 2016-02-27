@@ -48,9 +48,14 @@ describe('tests', function () {
 			configs: require('./configs/simple.json')
 		});
 		var spy = sinon.spy(dependency.container, "get");
-		dependency.bootstrap({dependencies: ['ClassB', 'ClassC']});
+		dependency.bootstrap({
+			add: [{name: 'newOne', value: {t: 1}}, {name: 'newTwo', value: {}}], 
+			targets: ['ClassB', 'ClassC']
+		});
 		assert(spy.calledTwice);
 		assert.equal(spy.getCall(0).args[0], 'ClassB');
 		assert.equal(spy.getCall(1).args[0], 'ClassC');
+		assert(dependency.get('newOne').t);
+		assert(dependency.get('newTwo'));
 	});
 });

@@ -19,9 +19,6 @@ module.exports = function(params) {
 		}
 		if(definition.constructor === Object && definition.path) {
 			obj = module.parent.require(definition.path);
-			if(definition.singleton) {
-				singletons[dependencyName] = -1;
-			}
 			if(definition.shim) {
 				that.container.register(dependencyName, function(){
 					return obj;
@@ -45,8 +42,14 @@ module.exports = function(params) {
 	};
 
 	this.bootstrap = function(params) {
-		var dependencyNames = params.dependencies;
-		dependencyNames.forEach(function(name) {
+		var newDependencies = params.add;
+		var targets = params.targets;
+		if(newDependencies) {
+			newDependencies.forEach(function(newDep) {
+				that.container.register(newDep.name, newDep.value);
+			});
+		}
+		targets.forEach(function(name) {
 			that.container.get(name);
 		});
 	};
