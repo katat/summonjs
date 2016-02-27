@@ -1,0 +1,12 @@
+{
+	"dependency": {
+		"Class": "./src/class_a",
+		"nonsingleton": {
+			"path": "./src/singleton"
+		},
+		"singleton": {
+			"path": "./src/singleton",
+			"singleton": true
+		}
+	}
+}

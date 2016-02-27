@@ -1,0 +1,6 @@
+{
+	"dependency": {
+		"custom": [1, 2, 3],
+		"other_custom": {"key": 1}
+	}
+}
