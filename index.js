@@ -41,7 +41,7 @@ module.exports = function(params) {
 		that.container.resolve.apply(that.container, arguments);
 	};
 
-	this.bootstrap = function(params) {
+	this.invoke = function(params) {
 		var newDependencies = params.add;
 		var targets = params.targets;
 		if(newDependencies) {

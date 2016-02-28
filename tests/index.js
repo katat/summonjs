@@ -48,7 +48,7 @@ describe('tests', function () {
 			configs: require('./configs/simple.json')
 		});
 		var spy = sinon.spy(summon.container, "get");
-		summon.bootstrap({
+		summon.invoke({
 			add: [{name: 'newOne', value: {t: 1}}, {name: 'newTwo', value: {}}], 
 			targets: ['ClassB', 'ClassC']
 		});
