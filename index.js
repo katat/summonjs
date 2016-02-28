@@ -45,8 +45,8 @@ module.exports = function(params) {
 		var newDependencies = params.override;
 		var targets = params.targets;
 		if(newDependencies) {
-			newDependencies.forEach(function(newDep) {
-				that.container.register(newDep.name, newDep.value);
+			Object.keys(newDependencies).forEach(function(name) {
+				that.container.register(name, newDependencies[name]);
 			});
 		}
 		targets.forEach(function(name) {

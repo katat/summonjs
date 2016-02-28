@@ -49,7 +49,7 @@ describe('tests', function () {
 		});
 		var spy = sinon.spy(summon.container, "get");
 		summon.invoke({
-			override: [{name: 'newOne', value: {t: 1}}, {name: 'newTwo', value: {}}], 
+			override: {newOne: {t: 1}, newTwo: {}}, 
 			targets: ['ClassB', 'ClassC']
 		});
 		assert(spy.calledTwice);
