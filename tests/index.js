@@ -49,7 +49,7 @@ describe('tests', function () {
 		});
 		var spy = sinon.spy(summon.container, "get");
 		summon.invoke({
-			add: [{name: 'newOne', value: {t: 1}}, {name: 'newTwo', value: {}}], 
+			override: [{name: 'newOne', value: {t: 1}}, {name: 'newTwo', value: {}}], 
 			targets: ['ClassB', 'ClassC']
 		});
 		assert(spy.calledTwice);
@@ -57,5 +57,14 @@ describe('tests', function () {
 		assert.equal(spy.getCall(1).args[0], 'ClassC');
 		assert(summon.get('newOne').t);
 		assert(summon.get('newTwo'));
+	});
+	it('should use pre-created container', function () {
+		var container = require('dependable').container();
+		container.register('test', true);
+		var summon = require('../')({
+			container: container,
+			configs: require('./configs/simple.json')
+		});
+		assert.equal(summon.container.get('test'), true);
 	});
 });

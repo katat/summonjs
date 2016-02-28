@@ -42,7 +42,7 @@ module.exports = function(params) {
 	};
 
 	this.invoke = function(params) {
-		var newDependencies = params.add;
+		var newDependencies = params.override;
 		var targets = params.targets;
 		if(newDependencies) {
 			newDependencies.forEach(function(newDep) {
