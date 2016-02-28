@@ -1,7 +1,7 @@
 {
-  "name": "dependency",
-  "version": "0.0.1",
-  "description": "",
+  "name": "summonjs",
+  "version": "0.1.0",
+  "description": "Define module dependencies in JSON format, and be able to resolve them using angular inject style.",
   "main": "index.js",
   "dependencies": {
     "dependable": "^0.2.5",
