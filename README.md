@@ -5,9 +5,9 @@ Define Node.js module dependencies in JSON format, and be able to resolve them u
 Create a JSON file, define the mappings between dependency name and the source files.
 ```
 "dependency": {
-	"ClassA": "./src/class_a",
-	"ClassB": "./src/class_b",
-	"_": {
+    "ClassA": "./src/class_a",
+    "ClassB": "./src/class_b",
+    "_": {
         path: "lodash",
         shim: true
     }
@@ -22,7 +22,7 @@ Pass in the dependency definition JSON file to the `summonjs` module, it will ma
     });
 
 ### Auto inject dependencies by argument names
-Take below function from `./src/class_a` for example, `ClassB` is a function argument, and it maps to the source file `./src/class_b`. When `ClassA` is loaded from summonjs, the `ClassA` will be injected automatically, available to the scope of `ClassA`.
+Take below function from `./src/class_a` for example, `ClassB` is a function argument, and it maps to the source file `./src/class_b`. When `ClassA` is loaded from SummonJS, the `ClassA` will be injected automatically, available to the scope of `ClassA`.
 
 `./src/class_a`:
 
