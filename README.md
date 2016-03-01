@@ -1,16 +1,20 @@
+### SummonJS
+Define Node.js module dependencies in JSON format, and be able to resolve them using angular inject style.
+
 ### Define Dependency
 Create a JSON file, define the mappings between dependency name and the source files.
-
-    {
-    	"dependency": {
-    		"ClassA": "./src/class_a",
-    		"ClassB": "./src/class_b",
-    		"_": {
-                path: "lodash",
-                shim: true
-            }
-    	}
-    }
+```
+{
+	"dependency": {
+		"ClassA": "./src/class_a",
+		"ClassB": "./src/class_b",
+		"_": {
+            path: "lodash",
+            shim: true
+        }
+	}
+}
+```
 
 ### Init the dependency manager
 Pass in the dependency definition JSON file to the `summonjs` module, it will make all the dependencies defined available via `summonjs`:
