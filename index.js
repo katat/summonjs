@@ -46,11 +46,11 @@ module.exports = function(params) {
 		var targets = params.targets;
 		if(newDependencies) {
 			Object.keys(newDependencies).forEach(function(name) {
-				that.container.register(name, newDependencies[name]);
+				that.register(name, newDependencies[name]);
 			});
 		}
 		targets.forEach(function(name) {
-			that.container.get(name);
+			that.get(name);
 		});
 	};
 
