@@ -39,19 +39,24 @@ module.exports = function(params) {
 		var definition = dependecies[dependencyName];
 		var obj = definition;
 
-		if(definition.constructor === String) {
-			obj = module.parent.require(definition);
-		}
-		if(definition.constructor === Object && definition.path) {
-			obj = module.parent.require(definition.path);
-			if(definition.shim) {
-				that.register(dependencyName, function(){
-					return obj;
-				});
-				return;
+		try {
+			if(definition.constructor === String) {
+				obj = module.parent.require(definition);
 			}
+			if(definition.constructor === Object && definition.path) {
+				obj = module.parent.require(definition.path);
+				if(definition.shim) {
+					that.register(dependencyName, function(){
+						return obj;
+					});
+					return;
+				}
+			}
+			that.register(dependencyName, obj);
+		} catch (e) {
+			console.error(e);
+			console.error('error when trying register %s', dependencyName);
 		}
-		that.register(dependencyName, obj);
 	});
 	return this;
 };
