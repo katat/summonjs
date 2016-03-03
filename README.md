@@ -22,7 +22,7 @@ Pass in the dependency definition JSON file to the `summonjs` module, it will ma
     });
 
 ### Auto inject dependencies by argument names
-Take below function from `./src/class_a` for example, `ClassB` is a function argument, and it maps to the source file `./src/class_b`. When `ClassA` is loaded from SummonJS, the `ClassA` will be injected automatically, available to the scope of `ClassA`.
+Take below function from `./src/class_a` for example, `ClassB` is a function argument, and it maps to the source file `./src/class_b`. When `ClassA` is loaded from SummonJS, the `ClassB` will be injected automatically, available to the scope of `ClassA`.
 
 `./src/class_a`:
 
