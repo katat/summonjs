@@ -10,25 +10,6 @@ module.exports = function(params) {
 		this.container = require('dependable').container();
 	}
 
-	Object.keys(dependecies).forEach(function(dependencyName) {
-		var definition = dependecies[dependencyName];
-		var obj = definition;
-
-		if(definition.constructor === String) {
-			obj = module.parent.require(definition);
-		}
-		if(definition.constructor === Object && definition.path) {
-			obj = module.parent.require(definition.path);
-			if(definition.shim) {
-				that.container.register(dependencyName, function(){
-					return obj;
-				});
-				return;
-			}
-		}
-		that.container.register(dependencyName, obj);
-	});
-
 	this.get = function(dependencyName) {
 		return that.container.get(dependencyName);
 	};
@@ -54,5 +35,23 @@ module.exports = function(params) {
 		});
 	};
 
+	Object.keys(dependecies).forEach(function(dependencyName) {
+		var definition = dependecies[dependencyName];
+		var obj = definition;
+
+		if(definition.constructor === String) {
+			obj = module.parent.require(definition);
+		}
+		if(definition.constructor === Object && definition.path) {
+			obj = module.parent.require(definition.path);
+			if(definition.shim) {
+				that.register(dependencyName, function(){
+					return obj;
+				});
+				return;
+			}
+		}
+		that.register(dependencyName, obj);
+	});
 	return this;
 };
