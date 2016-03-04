@@ -3,6 +3,7 @@ module.exports = function(params) {
 	var configs = params.configs;
 	var dependecies = configs.dependency;
 	var singletons = {};
+	var Q = require('q');
 
 	if (params.container) {
 		this.container = params.container;
@@ -51,9 +52,44 @@ module.exports = function(params) {
 					});
 					return;
 				}
-				// if(definition.hook) {
-				// 	console.log('prototype', obj.prototype);
-				// }
+				if(definition.hook) {
+
+					Object.keys(definition.hook).forEach(function(method) {
+						if (!obj.prototype[method]) {
+							throw new Error('There is no prototype method: ' + method + ' in the dependency: ' + dependencyName)
+						}
+						var hookDep = dependencyName + '.' + method;
+						that.register(hookDep, module.parent.require(definition.hook[method]));
+						var temp = obj.prototype[method];
+						obj.prototype[method] = function() {
+							var inheritScope = this;
+							var args = arguments;
+							var hookObj = that.get(hookDep);
+							var promise;
+							var funcs = [];
+							if(hookObj.beforeCall) {
+								funcs.push(function(){
+									return hookObj.beforeCall.apply(hookObj, args);
+								});
+							}
+							funcs.push(function(){
+								return temp.apply(inheritScope, args);
+							});
+							if(hookObj.afterCall) {
+								funcs.push(function(values){
+									args = Array.prototype.slice.call(args);
+									args = args.concat(values);
+									return hookObj.afterCall.apply(hookObj, args);
+								});
+							}
+							var initFunc = funcs[0];
+							funcs.splice(0, 1);
+							funcs.reduce(function (soFar, f) {
+							    return soFar.then(f);
+							}, initFunc());
+						}
+					});
+				}
 			}
 			that.register(dependencyName, obj);
 		} catch (e) {
