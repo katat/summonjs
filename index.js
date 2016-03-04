@@ -7,7 +7,7 @@ module.exports = function(params) {
 	if (params.container) {
 		this.container = params.container;
 	} else {
-		this.container = require('dependable').container();
+		this.container = require('./dependable').container();
 	}
 
 	this.get = function(dependencyName) {
@@ -51,6 +51,9 @@ module.exports = function(params) {
 					});
 					return;
 				}
+				// if(definition.hook) {
+				// 	console.log('prototype', obj.prototype);
+				// }
 			}
 			that.register(dependencyName, obj);
 		} catch (e) {
@@ -58,5 +61,6 @@ module.exports = function(params) {
 			console.error('error when trying register %s', dependencyName);
 		}
 	});
+
 	return this;
 };
