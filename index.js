@@ -73,7 +73,7 @@ module.exports = function(params) {
 								});
 							}
 							funcs.push(function(){
-								return temp.apply(inheritScope, args);
+								return temp.apply(that.get(dependencyName), args);
 							});
 							if(hookObj.afterCall) {
 								funcs.push(function(values){
