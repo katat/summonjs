@@ -5,6 +5,7 @@ module.exports = function(params) {
 	var singletons = {};
 	var Q = require('q');
 	var path = require('path');
+	var util = require('util');
 
 	if (params.container) {
 		this.container = params.container;
@@ -57,28 +58,37 @@ module.exports = function(params) {
 				that.register(hookDep, hookDefs[method]);
 			}
 			var temp = obj.prototype[method];
-			obj.prototype[method] = function() {
-				var hookObj = that.get(hookDep);
-				var args = arguments;
-				var lastarg = args[args.length - 1];
-				if(typeof lastarg === 'function') {
-					args[args.length - 1] = function() {
-						var mainargs = Array.prototype.slice.call(arguments);
-						if(arguments[0] === false) {
-							var finalArgs = Array.prototype.slice.call(arguments);
-							finalArgs.splice(0, 1);
-							lastarg.apply(lastarg, finalArgs);
-							return;
-						}
-						mainargs.push(function() {
-							var postargs = Array.prototype.slice.call(arguments);
-							postargs.push(lastarg);
-							hookObj.post.apply(hookObj, postargs);
-						});
-						temp.apply(that.get(dependencyName), mainargs);
-					};
-					hookObj.pre.apply(hookObj, args);
+			try {
+				obj.prototype[method] = function() {
+					var hookObj = that.get(hookDep);
+					if(!hookObj.pre || !hookObj.post) {
+						throw new Error(util.format('need to defined pre/post functions for hook %s.%s', dependencyName, method));
+					}
+					var args = arguments;
+					var lastarg = args[args.length - 1];
+					if(typeof lastarg === 'function') {
+						args[args.length - 1] = function() {
+							var mainargs = Array.prototype.slice.call(arguments);
+							if(arguments[0] === false) {
+								var finalArgs = Array.prototype.slice.call(arguments);
+								finalArgs.splice(0, 1);
+								lastarg.apply(lastarg, finalArgs);
+								return;
+							}
+							mainargs.push(function() {
+								var postargs = Array.prototype.slice.call(arguments);
+								postargs.push(lastarg);
+								hookObj.post.apply(hookObj, postargs);
+							});
+							temp.apply(that.get(dependencyName), mainargs);
+						};
+						hookObj.pre.apply(hookObj, args);
+					}
 				}
+			} catch (e) {
+				console.log('test', e);
+			} finally {
+
 			}
 		});
 	};
@@ -110,7 +120,7 @@ module.exports = function(params) {
 			}
 			that.register(dependencyName, obj);
 		} catch (e) {
-			console.error(e);
+			console.error('test', e);
 			console.error('error when trying register %s', dependencyName);
 		}
 	});
