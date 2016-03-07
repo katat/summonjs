@@ -42,7 +42,19 @@ module.exports = function(params) {
 			});
 		}
 		targets.forEach(function(name) {
-			that.get(name);
+			var parts = name.split('.');
+			var classObj = that.get(parts[0]);
+			var method = parts[1];
+			if (method) {
+				if(!classObj[method]) {
+					throw new Error(util.format('there is no method %s.%s', name, method));
+				}
+				if (params.noHook) {
+					classObj[method].origin.apply(classObj, params.args);
+					return;
+				}
+				classObj[method].apply(classObj, params.args);
+			}
 		});
 	};
 
@@ -85,6 +97,7 @@ module.exports = function(params) {
 						hookObj.pre.apply(hookObj, args);
 					}
 				}
+				obj.prototype[method].origin = temp;
 			} catch (e) {
 				console.log('test', e);
 			} finally {
