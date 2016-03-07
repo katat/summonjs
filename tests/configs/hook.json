@@ -1,0 +1,10 @@
+{
+	"dependency": {
+		"ClassB": {
+            "path" : "./src/class_b",
+            "hook" : {
+                "main" : "./src/hook"
+            }
+        }
+	}
+}
