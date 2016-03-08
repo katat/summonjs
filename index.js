@@ -95,11 +95,18 @@ module.exports = function(params) {
 							temp.apply(that.get(dependencyName), mainargs);
 						};
 						hookObj.pre.apply(hookObj, args);
+					} else {
+						var args = Array.prototype.slice.call(args);
+						args.push(function() {
+							var mainCallReturn = temp.apply(that.get(dependencyName), arguments);
+							hookObj.post.apply(hookObj, [mainCallReturn]);
+						});
+						hookObj.pre.apply(hookObj, args);
 					}
 				}
 				obj.prototype[method].origin = temp;
 			} catch (e) {
-				console.log('test', e);
+				console.error(e);
 			} finally {
 
 			}
@@ -133,7 +140,6 @@ module.exports = function(params) {
 			}
 			that.register(dependencyName, obj);
 		} catch (e) {
-			console.error('test', e);
 			console.error('error when trying register %s', dependencyName);
 		}
 	});
