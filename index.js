@@ -60,6 +60,7 @@ module.exports = function(params) {
 					if(preHook && postHook) {
 						params.args[params.args.length - 1] =
 							definePreHookCallback(
+								classObj,
 								classObj[method].origin,
 								lastarg,
 								definePostHookCallback(lastarg, postHook)
@@ -69,7 +70,7 @@ module.exports = function(params) {
 					}
 					if(preHook) {
 						params.args[params.args.length - 1] =
-							definePreHookCallback(classObj[method].origin, lastarg);
+							definePreHookCallback(classObj, classObj[method].origin, lastarg);
 						preHook.apply(preHook, params.args);
 					}
 					if(postHook) {
@@ -84,7 +85,7 @@ module.exports = function(params) {
 		});
 	};
 
-	var definePreHookCallback = function(originFunc, originCallback, postCallback) {
+	var definePreHookCallback = function(dependency, originFunc, originCallback, postCallback) {
 		return function() {
 			var mainargs = Array.prototype.slice.call(arguments);
 			if(arguments[0] === false) {
@@ -98,7 +99,7 @@ module.exports = function(params) {
 			} else {
 				mainargs.push(originCallback);
 			}
-			originFunc.apply(originFunc, mainargs);
+			originFunc.apply(dependency, mainargs);
 		}
 	};
 
@@ -121,7 +122,7 @@ module.exports = function(params) {
 			var lastarg = args[args.length - 1];
 			if(typeof lastarg === 'function') {
 				args[args.length - 1] =
-					definePreHookCallback(originFunc, lastarg, definePostHookCallback(lastarg, hookObj.post));
+					definePreHookCallback(that.get(dependencyName), originFunc, lastarg, definePostHookCallback(lastarg, hookObj.post));
 				hookObj.pre.apply(hookObj, args);
 			} else {
 				var args = Array.prototype.slice.call(args);
