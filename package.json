@@ -1,6 +1,6 @@
 {
   "name": "summonjs",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Define Node.js module dependencies in JSON format, and be able to resolve them using angular inject style.",
   "main": "index.js",
   "contributors": [
