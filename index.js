@@ -17,6 +17,10 @@ module.exports = function(params) {
 		return that.container.get(dependencyName);
 	};
 
+	this.getHookObj = function(dependencyName, method) {
+		return that.container.get(dependencyName + '.' + method);
+	};
+
 	this.register = function() {
 		var args = Array.prototype.slice.call(arguments);
 		if (args.length === 3) {
