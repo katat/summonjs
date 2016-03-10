@@ -53,9 +53,85 @@ module.exports = function(params) {
 					classObj[method].origin.apply(classObj, params.args);
 					return;
 				}
+				if (params.withHooks) {
+					var preHook = params.withHooks.pre;
+					var postHook = params.withHooks.post;
+					var lastarg = params.args[params.args.length - 1];
+					if(preHook && postHook) {
+						params.args[params.args.length - 1] =
+							definePreHookCallback(
+								classObj[method].origin,
+								lastarg,
+								definePostHookCallback(lastarg, postHook)
+							);
+						preHook.apply(preHook, params.args);
+						return;
+					}
+					if(preHook) {
+						params.args[params.args.length - 1] =
+							definePreHookCallback(classObj[method].origin, lastarg);
+						preHook.apply(preHook, params.args);
+					}
+					if(postHook) {
+						params.args[params.args.length - 1] =
+							definePostHookCallback(lastarg, postHook);
+						classObj[method].origin.apply(classObj, params.args);
+					}
+					return;
+				}
 				classObj[method].apply(classObj, params.args);
 			}
 		});
+	};
+
+	var definePreHookCallback = function(originFunc, originCallback, postCallback) {
+		return function() {
+			var mainargs = Array.prototype.slice.call(arguments);
+			if(arguments[0] === false) {
+				var finalArgs = Array.prototype.slice.call(arguments);
+				finalArgs.splice(0, 1);
+				originCallback.apply(originCallback, finalArgs);
+				return;
+			}
+			if(postCallback) {
+				mainargs.push(postCallback);
+			} else {
+				mainargs.push(originCallback);
+			}
+			originFunc.apply(originFunc, mainargs);
+		}
+	};
+
+	var definePostHookCallback = function(originCallback, postHookFunc) {
+		return function () {
+			var postargs = Array.prototype.slice.call(arguments);
+			postargs.push(originCallback);
+			postHookFunc.apply(postHookFunc, postargs);
+		};
+	};
+
+	var hookFunction = function(hookDep, originFunc) {
+		return function() {
+			var args = arguments;
+			var dependencyName = hookDep.split('.')[0];
+			var hookObj = that.get(hookDep);
+			if(!hookObj.pre || !hookObj.post) {
+				throw new Error(util.format('need to defined pre/post functions for hook %s.%s', dependencyName, method));
+			}
+			var lastarg = args[args.length - 1];
+			if(typeof lastarg === 'function') {
+				args[args.length - 1] =
+					definePreHookCallback(originFunc, lastarg, definePostHookCallback(lastarg, hookObj.post));
+				hookObj.pre.apply(hookObj, args);
+			} else {
+				var args = Array.prototype.slice.call(args);
+				args.push(function() {
+					var mainCallReturn = originFunc.apply(that.get(dependencyName), arguments);
+					hookObj.post.apply(hookObj, [mainCallReturn]);
+				});
+				hookObj.pre.apply(hookObj, args);
+			}
+		};
 	};
 
 	var defineHook = function(dependencyName, hookDefs, obj) {
@@ -69,46 +145,12 @@ module.exports = function(params) {
 			} else {
 				that.register(hookDep, hookDefs[method]);
 			}
-			var temp = obj.prototype[method];
+			var originFunc = obj.prototype[method];
 			try {
-				obj.prototype[method] = function() {
-					var hookObj = that.get(hookDep);
-					if(!hookObj.pre || !hookObj.post) {
-						throw new Error(util.format('need to defined pre/post functions for hook %s.%s', dependencyName, method));
-					}
-					var args = arguments;
-					var lastarg = args[args.length - 1];
-					if(typeof lastarg === 'function') {
-						args[args.length - 1] = function() {
-							var mainargs = Array.prototype.slice.call(arguments);
-							if(arguments[0] === false) {
-								var finalArgs = Array.prototype.slice.call(arguments);
-								finalArgs.splice(0, 1);
-								lastarg.apply(lastarg, finalArgs);
-								return;
-							}
-							mainargs.push(function() {
-								var postargs = Array.prototype.slice.call(arguments);
-								postargs.push(lastarg);
-								hookObj.post.apply(hookObj, postargs);
-							});
-							temp.apply(that.get(dependencyName), mainargs);
-						};
-						hookObj.pre.apply(hookObj, args);
-					} else {
-						var args = Array.prototype.slice.call(args);
-						args.push(function() {
-							var mainCallReturn = temp.apply(that.get(dependencyName), arguments);
-							hookObj.post.apply(hookObj, [mainCallReturn]);
-						});
-						hookObj.pre.apply(hookObj, args);
-					}
-				}
-				obj.prototype[method].origin = temp;
+				obj.prototype[method] = hookFunction(hookDep, originFunc);
+				obj.prototype[method].origin = originFunc;
 			} catch (e) {
 				console.error(e);
-			} finally {
-
 			}
 		});
 	};

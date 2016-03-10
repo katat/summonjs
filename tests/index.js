@@ -123,7 +123,7 @@ describe('tests', function () {
 						postcount ++;
 						assert.equal(arg, 'test');
 						assert.equal(arg2, 'test3');
-						next(arg, arg2);
+						next(arg, 'test4');
 					};
 					return this;
 				}});
@@ -133,7 +133,7 @@ describe('tests', function () {
 				var arg = 'test';
 				classB.main(arg, function(test, test2){
 					assert.equal(test, 'test');
-					assert.equal(test2, 'test3');
+					assert.equal(test2, 'test4');
 					assert.equal(precount, 1);
 					assert.equal(postcount, 1);
 					assert.equal(mainproxy.callCount, 1);
@@ -149,7 +149,7 @@ describe('tests', function () {
 					assert.equal(arg, 'test');
 					callback(arg, 'test1');
 				};
-				summon.register('ClassB', classb, {main: function() {
+				var main = function() {
 					this.pre = function(arg, next) {
 						precount ++;
 						assert.equal(arg, 'test');
@@ -162,7 +162,9 @@ describe('tests', function () {
 						next(arg, arg2);
 					};
 					return this;
-				}});
+				};
+				var mainObj = main();
+				summon.register('ClassB', classb, {main: mainObj});
 				var classB = summon.get('ClassB');
 				var mainproxy = sinon.spy(classB.main, 'origin');
 
@@ -209,13 +211,164 @@ describe('tests', function () {
 					return this;
 				}});
 				var classB = summon.get('ClassB');
-				var mainproxy = sinon.spy(classB, 'main');
 
 				var arg = 'test';
 				classB.main(arg);
 				assert.equal(precount, 1);
 				assert.equal(postcount, 1);
 				assert.equal(maincount, 1);
+			});
+		});
+		describe('call with custom pre or post hook', function () {
+			it('should call post hook', function () {
+				var precount = 0;
+				var postcount = 0;
+				var classb = function() {
+					return this;
+				};
+				classb.prototype.main = function(arg, callback) {
+					assert.equal(arg, 'test');
+					callback(arg, 'test1');
+				};
+				var hookFunc = function() {
+					this.pre = function(arg, next) {
+						precount ++;
+						assert.equal(arg, 'test');
+						next(arg, 'test2');
+					};
+					this.post = function(arg, arg2, next) {
+						postcount ++;
+						assert.equal(arg, 'test');
+						assert.equal(arg2, 'test1');
+						next(arg, 'test2');
+					};
+					return this;
+				};
+
+				var hook = hookFunc();
+
+				summon.register('ClassB', classb, {main: hook});
+				var classB = summon.get('ClassB');
+				var mainproxy = sinon.spy(classB.main, 'origin');
+
+				var arg = 'test';
+				summon.invoke({
+					targets: ['ClassB.main'],
+					args: [
+						arg,
+						function(test, test2) {
+							assert.equal(test, 'test');
+							assert.equal(test2, 'test2');
+							assert.equal(precount, 0);
+							assert.equal(postcount, 1);
+							assert.equal(mainproxy.callCount, 1);
+						}
+					],
+					withHooks: {
+						post: hook.post
+					}
+				});
+			});
+			it('should call pre hook', function () {
+				var precount = 0;
+				var postcount = 0;
+				var classb = function() {
+					return this;
+				};
+				classb.prototype.main = function(arg, arg2, callback) {
+					assert.equal(arg, 'test');
+					assert.equal(arg2, 'test2');
+					callback(arg, 'test3');
+				};
+				var hookFunc = function() {
+					this.pre = function(arg, next) {
+						precount ++;
+						assert.equal(arg, 'test');
+						next(arg, 'test2');
+					};
+					this.post = function(arg, arg2, next) {
+						postcount ++;
+						assert.equal(arg, 'test');
+						assert.equal(arg2, 'test1');
+						next(arg, 'test2');
+					};
+					return this;
+				};
+
+				var hook = hookFunc();
+
+				summon.register('ClassB', classb, {main: hook});
+				var classB = summon.get('ClassB');
+				var mainproxy = sinon.spy(classB.main, 'origin');
+
+				var arg = 'test';
+				summon.invoke({
+					targets: ['ClassB.main'],
+					args: [
+						arg,
+						function(test, test2) {
+							assert.equal(test, 'test');
+							assert.equal(test2, 'test3');
+							assert.equal(precount, 1);
+							assert.equal(postcount, 0);
+							assert.equal(mainproxy.callCount, 1);
+						}
+					],
+					withHooks: {
+						pre: hook.pre
+					}
+				});
+			});
+			it('should call both pre post hook', function () {
+				var precount = 0;
+				var postcount = 0;
+				var classb = function() {
+					return this;
+				};
+				classb.prototype.main = function(arg, arg2, callback) {
+					assert.equal(arg, 'test');
+					assert.equal(arg2, 'test2');
+					callback(arg, 'test3');
+				};
+				var hook = function() {
+					this.pre = function(arg, next) {
+						precount ++;
+						assert.equal(arg, 'test');
+						next(arg, 'test2');
+					};
+					this.post = function(arg, arg2, next) {
+						postcount ++;
+						assert.equal(arg, 'test');
+						assert.equal(arg2, 'test3');
+						next(arg, 'test4');
+					};
+					return this;
+				};
+
+				var hookObj = hook();
+
+				summon.register('ClassB', classb, {main: hookObj});
+				var classB = summon.get('ClassB');
+				var mainproxy = sinon.spy(classB.main, 'origin');
+
+				var arg = 'test';
+				summon.invoke({
+					targets: ['ClassB.main'],
+					args: [
+						arg,
+						function(test, test2) {
+							assert.equal(precount, 1);
+							assert.equal(postcount, 1);
+							assert.equal(mainproxy.callCount, 1);
+							assert.equal(test, 'test');
+							assert.equal(test2, 'test4');
+						}
+					],
+					withHooks: {
+						pre: hookObj.pre,
+						post: hookObj.post
+					}
+				});
 			});
 		});
 	});
