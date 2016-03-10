@@ -106,11 +106,13 @@ describe('tests', function () {
 				var precount = 0;
 				var postcount = 0;
 				var classb = function() {
+					this.func = function() {};
 					return this;
 				};
 				classb.prototype.main = function(arg, arg2, callback) {
 					assert.equal(arg, 'test');
 					assert.equal(arg2, 'test2');
+					assert(this.func);
 					callback(arg, 'test3');
 				};
 				summon.register('ClassB', classb, {main: function() {
