@@ -372,6 +372,47 @@ describe('tests', function () {
 					}
 				});
 			});
+			it('should call both pre post hook', function () {
+				var precount = 0;
+				var postcount = 0;
+				var classb = function() {
+					return this;
+				};
+				classb.prototype.main = function(arg, arg2, callback) {
+					assert.equal(arg, 'test');
+					assert.equal(arg2, 'test2');
+					callback(arg, 'test3');
+				};
+				var hook = function() {
+					this.pre = function(arg, next) {
+						precount ++;
+						assert.equal(arg, 'test');
+						next(arg, 'test2');
+					};
+					this.post = function(arg, arg2, next) {
+						postcount ++;
+						assert.equal(arg, 'test');
+						assert.equal(arg2, 'test3');
+						next(arg, 'test4');
+					};
+					return this;
+				};
+
+				var hookObj = hook();
+
+				summon.register('ClassB', classb, {main: hookObj});
+				var classB = summon.get('ClassB');
+				var mainproxy = sinon.spy(classB.main, 'origin');
+
+				var arg = 'test';
+				classB.main.callWithHooks({pre: true}, arg, function(test, test2) {
+					assert.equal(precount, 1);
+					assert.equal(postcount, 0);
+					assert.equal(mainproxy.callCount, 1);
+					assert.equal(test, 'test');
+					assert.equal(test2, 'test3');
+				});
+			});
 		});
 	});
 });
