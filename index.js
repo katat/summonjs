@@ -3,7 +3,6 @@ module.exports = function(params) {
 	var configs = params.configs;
 	var dependecies = configs.dependency;
 	var singletons = {};
-	var Q = require('q');
 	var path = require('path');
 	var util = require('util');
 
