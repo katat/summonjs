@@ -154,6 +154,20 @@ module.exports = function(params) {
 			try {
 				obj.prototype[method] = hookFunction(hookDep, originFunc);
 				obj.prototype[method].origin = originFunc;
+				obj.prototype[method].callWithHooks = function() {
+					var hookConfigs = arguments[0];
+					var funcArgs = Array.prototype.slice.call(arguments);
+					funcArgs.splice(0, 1);
+					var hookObj = that.get(hookDep);
+					that.invoke({
+						targets: [hookDep],
+						args: funcArgs,
+						withHooks: {
+							pre: hookConfigs.pre ? hookObj.pre : null,
+							post: hookConfigs.post ? hookObj.post : null
+						}
+					});
+				};
 			} catch (e) {
 				console.error(e);
 			}
