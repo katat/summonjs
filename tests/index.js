@@ -80,7 +80,7 @@ describe('tests', function () {
 				var postSpy = sinon.spy(summon.get('ClassB.main'), 'post');
 				var mainSpy = sinon.spy(summon.get('ClassB'), 'main');
 				summon.get('ClassB').main('test', function(arg1) {
-					assert.equal(arg1, 'test');
+					assert.equal(arg1, 'test passed to pre hook; passed to main func; passed to post hook;');
 				});
 				assert(mainSpy.calledOnce);
 				assert(preSpy.calledOnce);

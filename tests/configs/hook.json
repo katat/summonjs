@@ -1,5 +1,6 @@
 {
 	"dependency": {
+		"ClassA": "./src/class_a",
 		"ClassB": {
             "path" : "./src/class_b",
             "hook" : {

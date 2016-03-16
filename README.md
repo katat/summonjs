@@ -80,6 +80,59 @@ If it is a function, when it loads by summon the first time, it will execute the
         targets: ['ClassA', 'ClassC']
     })
 
+### Hook Dependency Functions
+In some scenarios, there might be needs to add integrate intercept logics for a object's function, such as manipulate input arguments before passing them to an existing function, or adding data caching logics in the function. SummonJS has a way to create a pre/post logic hook for a dependency's function, making it easier to plug in or plug out the custom logics to a function.
+
+The SummonJS definition below define a dependency with a hook object.
+
+    {
+    	"dependency": {
+    		"ClassB": {
+                "path" : "./src/class_b",
+                "hook" : {
+                    "main" : "./src/hook"
+                }
+            }
+    	}
+    }
+
+The `main` key value under the `hook` property is the function needed to be hooked with the pre/post logics defined in the `./src/hook` file. The hook object needs to have pre/post functions such as below:
+
+    module.exports = function(ClassA) {
+    	this.pre = function(arg, next) {
+            next(arg + ' passed to pre hook;');
+        };
+        this.post = function(arg, next) {
+            next(arg + ' passed to post hook;');
+        };
+    	return this;
+    };
+
+With the ClassB source code as below:
+
+    var classb = function() {
+    	return this;
+    };
+    classb.prototype.main = function(arg, callback) {
+    	callback(arg + ' passed to main func;');
+    };
+    module.exports = classb;
+
+Note that in order for a function to be hooked, it has be defined as a prototype function.
+
+The callback result of the `main` will be as below:
+
+    var mainCallback = function(arg1) {
+        assert.equal(arg1, 'test passed to pre hook; passed to main func; passed to post hook;');
+    };
+    summon.get('ClassB').main('test', mainCallback);
+
+Here is how the hook works:
+1. `pre` hook function will be called first when the `main` function is called.
+2. `next` function in the pre hook will call the `ClassB.main` with the arguments.
+3. The `callback` argument in the `main` function will call the `post` hook function with the arguments.
+4. The original `mainCallback` will be postponed to be the `next` callback function in the post hook.
+5. Assume if `ClassA` is defined in the dependency config json, it can be injected into the hook scope function and to be used by the pre/post hook functions.
 
 ### Welcome Contributions
 Feel free to fork and add features suit your needs.
