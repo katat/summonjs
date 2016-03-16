@@ -1,7 +1,8 @@
 module.exports = function(params) {
 	var that = this;
 	var configs = params.configs;
-	var dependecies = configs.dependency;
+	var dependecies;
+	dependecies = (configs && configs.dependency) ? configs.dependency : {}
 	var singletons = {};
 	var path = require('path');
 	var util = require('util');
@@ -172,7 +173,6 @@ module.exports = function(params) {
 			}
 		});
 	};
-
 	Object.keys(dependecies).forEach(function(dependencyName) {
 		var definition = dependecies[dependencyName];
 		var obj = definition;

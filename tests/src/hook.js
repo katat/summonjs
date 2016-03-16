@@ -1,9 +1,9 @@
 module.exports = function() {
 	this.pre = function(arg, next) {
-        next(false, 'test', 'test2');
+        next(arg);
     };
     this.post = function(arg, next) {
-        next();
+        next(arg);
     };
 	return this;
 };
