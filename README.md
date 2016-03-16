@@ -140,11 +140,11 @@ summon.get('ClassB').main('test', mainCallback);
 ```
 
 Here is how the hook works:
-1. `pre` hook function will be called first when the `main` function is called.
-2. `next` function in the pre hook will call the `ClassB.main` with the arguments.
-3. The `callback` argument in the `main` function will call the `post` hook function with the arguments.
-4. The original `mainCallback` will be postponed to be the `next` callback function in the post hook.
-5. Assume if `ClassA` is defined in the dependency config json, it can be injected into the hook scope function and to be used by the pre/post hook functions.
+ 1. `pre` hook function will be called first when the `main` function is called.
+ 2. `next` function in the pre hook will call the `ClassB.main` with the arguments.
+ 3. The `callback` argument in the `main` function will call the `post` hook function with the arguments.
+ 4. The original `mainCallback` will be postponed to be the `next` callback function in the post hook.
+ 5. Assume if `ClassA` is defined in the dependency config json, it can be injected into the hook scope function and to be used by the pre/post hook functions.
 
 ### Welcome Contributions
 Feel free to fork and add features suit your needs.
