@@ -121,11 +121,12 @@ With the ClassB source code as below:
 Note that in order for a function to be hooked, it has be defined as a prototype function.
 
 The callback result of the `main` will be as below:
-
-    var mainCallback = function(arg1) {
-        assert.equal(arg1, 'test passed to pre hook; passed to main func; passed to post hook;');
-    };
-    summon.get('ClassB').main('test', mainCallback);
+```
+var mainCallback = function(arg1) {
+    assert.equal(arg1, 'test passed to pre hook; passed to main func; passed to post hook;');
+};
+summon.get('ClassB').main('test', mainCallback);
+```
 
 Here is how the hook works:
 1. `pre` hook function will be called first when the `main` function is called.
