@@ -1,6 +1,8 @@
 ### SummonJS
 Define Node.js module dependencies in JSON format, and be able to resolve them using angular inject style.
 
+`npm install summonjs`
+
 ### Define Dependency
 Create a JSON file, define the mappings between dependency name and the source files.
 ```javascript
@@ -148,3 +150,6 @@ Here is how the hook works:
 
 ### Welcome Contributions
 Feel free to fork and add features suit your needs.
+
+### Development Test
+Run `gulp`, it should run all the unit tests and generate a coverage report.
