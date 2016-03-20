@@ -1,5 +1,5 @@
 ### SummonJS
-Define Node.js module dependencies in JSON format, and be able to resolve them using angular inject style.
+    Define Node.js module dependencies in JSON format, and be able to resolve them using angular inject style. There is a [sample Node.js Express API](https://github.com/katat/flexform-api) built with SummonJS.
 
 `npm install summonjs`
 
