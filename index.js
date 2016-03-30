@@ -6,6 +6,7 @@ module.exports = function(params) {
 	var singletons = {};
 	var path = require('path');
 	var util = require('util');
+	var argv = require('yargs').argv;
 
 	if (params.container) {
 		this.container = params.container;
@@ -13,8 +14,26 @@ module.exports = function(params) {
 		this.container = require('./dependable').container();
 	}
 
+	this.container.register('summon', this);
+
 	this.get = function(dependencyName) {
-		return that.container.get(dependencyName);
+		try{
+			return that.container.get(dependencyName);
+		} catch(ex) {
+			var m, re = /dependency.'(.*?)'.was.not.registered/;
+			if ((m = re.exec(ex.message)) !== null) {
+				if (m.index === re.lastIndex) {
+			        re.lastIndex++;
+			    }
+				if(argv.debug) {
+					console.error('Could not find dependency %s, mocked it and try again to get dependency %s', m[1], dependencyName);
+				}
+				that.register(m[1], {});
+				return that.get(dependencyName);
+			}else {
+				throw ex;
+			}
+		}
 	};
 
 	this.getHookObj = function(dependencyName, method) {
@@ -34,7 +53,24 @@ module.exports = function(params) {
 	};
 
 	this.resolve = function() {
-		that.container.resolve.apply(that.container, arguments);
+		try {
+			that.container.resolve.apply(that.container, arguments);
+		}catch (ex) {
+			var m, re = /dependency.'(.*?)'.was.not.registered/;
+			if ((m = re.exec(ex.message)) !== null) {
+				if (m.index === re.lastIndex) {
+			        re.lastIndex++;
+			    }
+				if(argv.debug) {
+					console.error('Could not find dependency %s, mocked it and try again to get dependency %s', m[1], dependencyName);
+				}
+				console.log(m[1]);
+				that.register(m[1], {});
+				that.resolve.apply(that, arguments);
+			}else {
+				throw ex;
+			}
+		}
 	};
 
 	this.invoke = function(params) {
@@ -53,7 +89,7 @@ module.exports = function(params) {
 				if(!classObj[method]) {
 					throw new Error(util.format('there is no method %s.%s', name, method));
 				}
-				if (params.noHook) {
+				if (params.noHook && classObj[method].origin) {
 					classObj[method].origin.apply(classObj, params.args);
 					return;
 				}
@@ -200,7 +236,7 @@ module.exports = function(params) {
 			}
 			that.register(dependencyName, obj);
 		} catch (e) {
-			console.error('error when trying register %s', dependencyName);
+			console.error('error when trying register %s', dependencyName, e);
 		}
 	});
 

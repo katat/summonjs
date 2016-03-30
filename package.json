@@ -10,7 +10,8 @@
     "url": "git@github.com:katat/summonjs.git"
   },
   "dependencies": {
-    "lodash": "^4.5.1"
+    "lodash": "^4.5.1",
+    "yargs": "^4.3.2"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
